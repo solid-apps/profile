@@ -347,9 +347,9 @@
     shadow.appendChild(style)
 
     // --- Button ---
-    // Kept in memory (other code references it via onLogin/onLogout to
-    // update its text), but NOT appended to the shadow tree — the host
-    // app provides its own login affordance in its UI.
+    // Plaza vendored xlogin and suppressed this button because plaza
+    // renders its own login pill in the topbar. Profile shows the
+    // floating bottom-right pill — re-enabled.
     var btn = document.createElement('button')
     btn.className = 'xl-btn'
     btn.textContent = 'Login'
@@ -357,7 +357,7 @@
       if (_type) onLogout(btn)
       else showModal()
     }
-    // shadow.appendChild(btn)  // suppressed: no floating pill
+    shadow.appendChild(btn)
 
     // --- Overlay ---
     var overlay = document.createElement('div')
