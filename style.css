@@ -1,0 +1,345 @@
+/* profile — VK/Bluesky-shaped profile page, dark by default. */
+
+:root {
+  --bg: #0b0d12;
+  --surface: #11141c;
+  --surface-2: #181c26;
+  --border: #232838;
+  --text: #e7e9ee;
+  --muted: #8a90a0;
+  --dim: #6b7280;
+  --accent: #7aa2f7;
+  --accent-2: #bb9af7;
+  --danger: #f87171;
+  --ok: #6ee7b7;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  min-height: 100dvh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; cursor: pointer; }
+
+/* ---------- topbar ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(11,13,18,0.72);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  text-transform: lowercase;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.view-toggle {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.view-toggle:hover { border-color: var(--accent); }
+.view-toggle [data-view-label="agent"] { display: none; }
+body[data-view="agent"] .view-toggle [data-view-label="human"] { display: none; }
+body[data-view="agent"] .view-toggle [data-view-label="agent"] { display: inline; }
+
+.copy-link {
+  font-size: 16px;
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* ---------- main ---------- */
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-bottom: 60px;
+}
+.app.loading::after {
+  content: 'loading…';
+  display: block;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ---------- views ---------- */
+body[data-view="human"] .agent-view { display: none; }
+body[data-view="agent"] .human-view { display: none; }
+.app.loading .human-view, .app.loading .agent-view { display: none; }
+
+/* ---------- cover + identity ---------- */
+.cover {
+  height: 180px;
+  background:
+    radial-gradient(circle at 20% 40%, rgba(122,162,247,0.25), transparent 50%),
+    radial-gradient(circle at 80% 60%, rgba(187,154,247,0.20), transparent 50%),
+    linear-gradient(135deg, #1a1f2e, #11141c);
+  border-bottom: 1px solid var(--border);
+}
+.cover.editable { cursor: pointer; }
+
+.identity {
+  position: relative;
+  padding: 0 20px;
+  margin-top: -60px;
+  text-align: left;
+}
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid var(--bg);
+  background: var(--surface-2);
+  object-fit: cover;
+  display: block;
+}
+.avatar.editable { cursor: pointer; transition: transform 0.15s; }
+.avatar.editable:hover { transform: scale(1.02); }
+
+.name {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 12px 0 2px;
+  line-height: 1.2;
+  outline: none;
+  border-radius: 4px;
+}
+.handle {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 0 0 14px;
+  outline: none;
+  border-radius: 4px;
+}
+.status {
+  font-size: 16px;
+  color: var(--text);
+  margin: 0;
+  outline: none;
+  border-radius: 4px;
+  min-height: 1.5em;
+}
+
+[data-field][contenteditable="true"]:focus {
+  background: var(--surface-2);
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+[data-field].empty::before {
+  content: attr(data-placeholder);
+  color: var(--dim);
+  font-style: italic;
+}
+
+/* ---------- sections ---------- */
+section.links, section.apps, section.recent {
+  padding: 28px 20px 0;
+}
+section h2 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0 0 14px;
+}
+
+/* ---------- links ---------- */
+.link-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.link-list li {
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 4px 4px 14px;
+  gap: 8px;
+  font-size: 14px;
+}
+.link-list a { color: var(--text); }
+.remove-link {
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+.remove-link:hover { color: var(--danger); background: var(--surface); }
+
+.add-link {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+.add-link:hover { border-color: var(--accent); }
+
+/* ---------- apps ---------- */
+.app-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.app-list li a {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.app-list li a:hover { color: var(--text); border-color: var(--accent); text-decoration: none; }
+
+/* ---------- agent view ---------- */
+.agent-view {
+  padding: 28px 20px;
+}
+.agent-lede {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+.agent-lede code {
+  background: var(--surface-2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.soul {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* ---------- wizard ---------- */
+.wizard {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  max-width: 440px;
+  width: 92vw;
+  padding: 28px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.wizard::backdrop {
+  background: rgba(11,13,18,0.7);
+  backdrop-filter: blur(4px);
+}
+.wizard h2 { margin: 0 0 6px; font-size: 22px; }
+.wizard-sub { color: var(--muted); margin: 0 0 22px; font-size: 14px; }
+.wizard label {
+  display: block;
+  margin-bottom: 18px;
+}
+.wizard label span:first-child {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.wizard input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font: inherit;
+}
+.wizard input:focus { outline: none; border-color: var(--accent); }
+.photo-hint { display: block; font-size: 12px; color: var(--dim); margin-top: 4px; }
+.wizard-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.wizard .primary {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+}
+.wizard .primary:hover { filter: brightness(1.1); }
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.error { border-color: var(--danger); color: var(--danger); }
+
+/* ---------- mobile ---------- */
+@media (max-width: 520px) {
+  .topbar { padding: 10px 14px; }
+  .identity { padding: 0 14px; }
+  .name { font-size: 24px; }
+  section.links, section.apps, section.recent { padding-left: 14px; padding-right: 14px; }
+}

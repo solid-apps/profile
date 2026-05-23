@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Profile</title>
+<meta name="description" content="Your profile — human-friendly page, agent-friendly SOUL.md, one source of truth.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0d12">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-view="human">
+
+<header class="topbar">
+  <div class="brand">profile</div>
+  <div class="actions">
+    <button id="viewToggle" type="button" class="view-toggle" aria-label="Switch view">
+      <span data-view-label="human">Agent view</span>
+      <span data-view-label="agent">Human view</span>
+    </button>
+    <a id="copyLink" href="#" class="copy-link" title="Copy link to this profile">↗</a>
+  </div>
+</header>
+
+<main id="app" class="app loading">
+
+  <!-- Human view -->
+  <section class="human-view">
+    <div class="cover" id="cover" role="img" aria-label="Cover image"></div>
+
+    <div class="identity">
+      <img class="avatar" id="avatar" alt="" src="">
+      <h1 class="name" data-field="foaf:name" data-placeholder="Your name" contenteditable="false"></h1>
+      <p class="handle" data-field="schema:alternateName" data-placeholder="@handle" contenteditable="false"></p>
+      <p class="status" data-field="schema:description" data-placeholder="One line about you" contenteditable="false"></p>
+    </div>
+
+    <section class="links">
+      <h2>Links</h2>
+      <ul id="linkList" class="link-list"></ul>
+      <button id="addLink" class="add-link" type="button" hidden>+ add a link</button>
+    </section>
+
+    <section class="apps">
+      <h2>On this pod</h2>
+      <ul id="appList" class="app-list"></ul>
+    </section>
+
+    <section class="recent" id="recent" hidden>
+      <h2>Latest</h2>
+      <ul id="recentList" class="recent-list"></ul>
+    </section>
+  </section>
+
+  <!-- Agent view -->
+  <section class="agent-view">
+    <p class="agent-lede">
+      This is the markdown an AI agent sees when it visits
+      <code id="soulUrl">/profile/SOUL.md</code>. It's regenerated from your profile on save.
+    </p>
+    <pre id="soulPreview" class="soul"></pre>
+  </section>
+
+</main>
+
+<!-- First-run wizard -->
+<dialog id="wizard" class="wizard">
+  <form id="wizardForm" method="dialog">
+    <h2>Let's make your profile</h2>
+    <p class="wizard-sub">Three questions. Takes 30 seconds. You can edit anything later.</p>
+
+    <label>
+      <span>Your name</span>
+      <input name="name" required placeholder="e.g. Ada Lovelace" autocomplete="name">
+    </label>
+
+    <label>
+      <span>One line about you</span>
+      <input name="status" placeholder="e.g. Mathematician, dreaming of analytical engines" maxlength="160">
+    </label>
+
+    <label class="photo-drop">
+      <span>A photo</span>
+      <input name="photo" type="file" accept="image/*">
+      <span class="photo-hint">Optional — drop a file or skip.</span>
+    </label>
+
+    <div class="wizard-actions">
+      <button type="submit" class="primary">Make profile</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Toast for save feedback -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
