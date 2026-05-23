@@ -215,24 +215,10 @@ function renderEmpty() {
   } else {
     sub.textContent = 'This is the standalone view. Connect your pod to load (or create) your profile.'
     btn.textContent = 'Connect your pod'
-    btn.addEventListener('click', async () => {
-      // Lazy-load xlogin only when the standalone user actually needs it.
-      // On a pod we use /signin and never touch xlogin, which keeps the
-      // /idp/token 401 noise out of the console.
-      await loadScript('xlogin.js')
+    btn.addEventListener('click', () => {
       document.querySelector('.xl-btn')?.click()
     }, { once: true })
   }
-}
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script')
-    s.src = src
-    s.onload = resolve
-    s.onerror = reject
-    document.head.appendChild(s)
-  })
 }
 
 function isLikelyPod() {
