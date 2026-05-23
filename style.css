@@ -125,9 +125,11 @@ body[data-view="agent"] .human-view { display: none; }
   border: 4px solid var(--bg);
   background: var(--surface-2);
   object-fit: cover;
-  display: block;
   box-shadow: var(--shadow);
+  position: absolute;
+  inset: 0;
 }
+.avatar { display: block; }
 .avatar-fallback {
   display: grid;
   place-items: center;
@@ -137,6 +139,7 @@ body[data-view="agent"] .human-view { display: none; }
   background: linear-gradient(135deg, #eef2ff, #f7f8fa);
   user-select: none;
 }
+.avatar[hidden], .avatar-fallback[hidden] { display: none; }
 .avatar.editable, .avatar-fallback.editable {
   cursor: pointer;
   transition: transform 0.15s;
