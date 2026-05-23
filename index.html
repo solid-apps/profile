@@ -31,10 +31,14 @@
     <div class="cover" id="cover" role="img" aria-label="Cover image"></div>
 
     <div class="identity">
-      <img class="avatar" id="avatar" alt="" src="">
+      <div class="avatar-wrap">
+        <img class="avatar" id="avatar" alt="" hidden>
+        <div class="avatar-fallback" id="avatarFallback" aria-hidden="true">·</div>
+      </div>
       <h1 class="name" data-field="foaf:name" data-placeholder="Your name" contenteditable="false"></h1>
       <p class="handle" data-field="schema:alternateName" data-placeholder="@handle" contenteditable="false"></p>
       <p class="status" data-field="schema:description" data-placeholder="One line about you" contenteditable="false"></p>
+      <p class="edit-hint" id="editHint" hidden>tip: click any field to edit</p>
     </div>
 
     <section class="links">
@@ -104,7 +108,6 @@
 <!-- Toast for save feedback -->
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="xlogin.js"></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>

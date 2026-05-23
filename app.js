@@ -45,9 +45,31 @@ async function boot() {
 
   ctx.card = card
   app.classList.remove('loading')
+
+  // JSS auto-seeds card.jsonld with just foaf:name="me" on first boot.
+  // If we land on that stub and the owner is signed in, jump straight to
+  // the wizard — saves them hunting for click-to-edit affordances on an
+  // otherwise empty page.
+  if (ctx.editable && isStubCard(card)) {
+    openWizard()
+    return
+  }
+
   render()
   renderAgentView()
   loadInstalledApps()
+}
+
+function isStubCard(c) {
+  if (!c) return true
+  const meaningful = [
+    'schema:description', 'description',
+    'schema:alternateName', 'alternateName',
+    'foaf:img', 'schema:image', 'image',
+    'schema:url', 'url',
+    'soul:values', 'soul:hardLimits', 'soul:commsStyle', 'soul:memoryPolicy',
+  ]
+  return !meaningful.some(k => c[k])
 }
 
 // ---------- Auth detection ----------
@@ -74,9 +96,24 @@ function render() {
   setField('schema:alternateName', c['schema:alternateName'] || c.alternateName)
   setField('schema:description', c['schema:description'] || c.description)
 
+  // Avatar: only attempt to load if an explicit image URL is in the card.
+  // Otherwise show a clean initials circle — no 404 noise, looks intentional.
   const img = c['foaf:img'] || c.image || c['schema:image']
-  document.getElementById('avatar').src = img || AVATAR_URL
-  document.getElementById('avatar').onerror = function () { this.style.display = 'none' }
+  const avatarEl = document.getElementById('avatar')
+  const fallbackEl = document.getElementById('avatarFallback')
+  if (img) {
+    avatarEl.src = img
+    avatarEl.hidden = false
+    fallbackEl.style.display = 'none'
+    avatarEl.onerror = function () {
+      this.hidden = true
+      fallbackEl.style.display = ''
+    }
+  } else {
+    avatarEl.hidden = true
+    fallbackEl.style.display = ''
+  }
+  fallbackEl.textContent = initial(c['foaf:name'] || c.name)
 
   renderLinks(c['schema:url'] || c.url || [])
 
@@ -88,9 +125,30 @@ function render() {
     document.getElementById('addLink').hidden = false
     document.getElementById('addLink').addEventListener('click', onAddLink)
     document.getElementById('avatar').classList.add('editable')
+    document.getElementById('avatarFallback').classList.add('editable')
     document.getElementById('avatar').addEventListener('click', triggerAvatarUpload)
+    document.getElementById('avatarFallback').addEventListener('click', triggerAvatarUpload)
     document.getElementById('cover').classList.add('editable')
+
+    // First-time edit hint — fades on first interaction, persists per pod.
+    if (!localStorage.getItem('profile:edit-hint-seen')) {
+      const hint = document.getElementById('editHint')
+      hint.hidden = false
+      const dismiss = () => {
+        hint.classList.add('fade-out')
+        localStorage.setItem('profile:edit-hint-seen', '1')
+      }
+      document.querySelectorAll('[data-field]').forEach(el => {
+        el.addEventListener('focus', dismiss, { once: true })
+      })
+    }
   }
+}
+
+function initial(name) {
+  if (!name) return '·'
+  const ch = name.trim().charAt(0)
+  return ch ? ch.toUpperCase() : '·'
 }
 
 function setField(field, value) {
@@ -157,12 +215,24 @@ function renderEmpty() {
   } else {
     sub.textContent = 'This is the standalone view. Connect your pod to load (or create) your profile.'
     btn.textContent = 'Connect your pod'
-    btn.addEventListener('click', () => {
-      // Trigger xlogin's modal. The widget has its own button bottom-right;
-      // we synthesize a click on it.
+    btn.addEventListener('click', async () => {
+      // Lazy-load xlogin only when the standalone user actually needs it.
+      // On a pod we use /signin and never touch xlogin, which keeps the
+      // /idp/token 401 noise out of the console.
+      await loadScript('xlogin.js')
       document.querySelector('.xl-btn')?.click()
     }, { once: true })
   }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script')
+    s.src = src
+    s.onload = resolve
+    s.onerror = reject
+    document.head.appendChild(s)
+  })
 }
 
 function isLikelyPod() {
