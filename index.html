@@ -54,6 +54,14 @@
     </section>
   </section>
 
+  <!-- Empty state when there's no profile yet -->
+  <section class="empty-state" id="emptyState" hidden>
+    <div class="empty-avatar"></div>
+    <h2 class="empty-title">No profile yet</h2>
+    <p class="empty-sub" id="emptySub">Sign in as the pod owner to create one.</p>
+    <button id="signInBtn" type="button" class="primary">Sign in</button>
+  </section>
+
   <!-- Agent view -->
   <section class="agent-view">
     <p class="agent-lede">
@@ -96,6 +104,7 @@
 <!-- Toast for save feedback -->
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+<script src="xlogin.js"></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -17,6 +17,10 @@ const ctx = {
   card: null,         // parsed JSON-LD
   editable: false,    // user is the pod owner
   dirty: false,
+  // Use the Solid OIDC session (set by xlogin.js) when available, otherwise
+  // fall back to plain fetch with credentials — that covers the common case
+  // of being signed into the same-origin JSS pod via cookie.
+  fetch: (...args) => (window.solid?.session?.fetch || window.fetch)(...args),
 }
 
 // ---------- Boot ----------
@@ -28,7 +32,7 @@ async function boot() {
 
   let card
   try {
-    const r = await fetch(CARD_URL, { credentials: 'include' })
+    const r = await ctx.fetch(CARD_URL, { credentials: 'include' })
     if (r.ok) card = await r.json()
   } catch {}
 
@@ -49,14 +53,8 @@ async function boot() {
 // ---------- Auth detection ----------
 
 async function detectOwner() {
-  // Probe with a HEAD on the card URL using credentials. If we get a write
-  // capability (PATCH/PUT in WAC-Allow), or if a 401 forces us to surface
-  // sign-in cues, react accordingly. For v0 we use a cheap proxy: try a
-  // conditional PUT with If-None-Match=* against a throwaway path under
-  // /private/ and see if it's accepted. Replaced with proper WAC-Allow
-  // parsing in v1.
   try {
-    const r = await fetch(`${POD}/profile/`, {
+    const r = await ctx.fetch(`${POD}/profile/`, {
       method: 'HEAD',
       credentials: 'include',
     })
@@ -138,9 +136,43 @@ function shortLink(url) {
 }
 
 function renderEmpty() {
-  document.querySelector('.identity .name').textContent = 'No profile yet'
-  document.querySelector('.identity .status').textContent =
-    'The pod owner can sign in and create one.'
+  document.querySelector('.human-view').hidden = true
+  const empty = document.getElementById('emptyState')
+  empty.hidden = false
+
+  // Tailor the message + button based on whether we're inside a pod
+  // (same-origin sign-in works) vs. served standalone from a static host
+  // (e.g. solid-apps.github.io — user needs to pick a pod via xlogin).
+  const onPod = isLikelyPod()
+  const sub = document.getElementById('emptySub')
+  const btn = document.getElementById('signInBtn')
+
+  if (onPod) {
+    sub.textContent = 'Sign in as the pod owner to create one.'
+    btn.textContent = 'Sign in'
+    btn.addEventListener('click', () => {
+      const returnTo = encodeURIComponent(location.pathname + location.search)
+      location.href = `${POD}/signin?returnTo=${returnTo}`
+    }, { once: true })
+  } else {
+    sub.textContent = 'This is the standalone view. Connect your pod to load (or create) your profile.'
+    btn.textContent = 'Connect your pod'
+    btn.addEventListener('click', () => {
+      // Trigger xlogin's modal. The widget has its own button bottom-right;
+      // we synthesize a click on it.
+      document.querySelector('.xl-btn')?.click()
+    }, { once: true })
+  }
+}
+
+function isLikelyPod() {
+  // Heuristic: a JSS pod responds at /idp/ (the OIDC issuer) with 200/302.
+  // We can't do that synchronously here — instead use a coarse proxy: if
+  // location.host looks like a github.io / netlify / vercel / pages.dev
+  // domain, treat as standalone; otherwise assume pod. Refined in v0.1
+  // with an actual /idp/ probe at boot.
+  const h = location.host
+  return !/\.(github|netlify|vercel|pages)\.(io|app|dev)$/i.test(h)
 }
 
 // ---------- Editing ----------
